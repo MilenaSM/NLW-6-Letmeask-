@@ -1,8 +1,12 @@
-import { useParams } from 'react-router';
-import { useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
+import { Fragment } from 'react';
+
+import Modal from 'react-modal';
 
 import logoImg from '../assets/images/logo.svg';
 import deleteImg from '../assets/images/delete.svg';
+import checkImg from '../assets/images/check.svg';
+import answerImg from '../assets/images/answer.svg';
 
 import { Button } from '../components/Button';
 import { Question } from '../components/Question';
@@ -13,6 +17,7 @@ import { useRoom } from '../hooks/useRoom';
 import { database } from '../services/firebase';
 
 import '../styles/room.scss';
+import { useState } from 'react';
 
 type RoomParams = {
   id: string; 
@@ -23,6 +28,8 @@ export function AdminRoom() {
   const history = useHistory();
   const params = useParams<RoomParams>();
   const roomId = params.id;
+
+  const [questionIdModalOpen, setQuestionIdModalOpen] = useState<string | undefined>();
 
   const { title, questions } = useRoom(roomId);
 
@@ -39,6 +46,18 @@ export function AdminRoom() {
       await database.ref(`rooms/${roomId}/questions/${questionId}`).remove()
     }
   }
+
+  async function handleCheckQuestionAnswered(questionId: string) {
+      await database.ref(`rooms/${roomId}/questions/${questionId}`).update({
+        isAnswered: true,
+      })
+    }
+
+  async function handleHighligthQuestion(questionId: string) {
+      await database.ref(`rooms/${roomId}/questions/${questionId}`).update({
+        isHighlighted: true,
+      })
+    }
 
   return (
     <div id="page-room">
@@ -60,18 +79,41 @@ export function AdminRoom() {
         <div className="question-list">
           { questions.map(question => {
             return (
+              <Fragment key={ question.id }>
               <Question
-                key={ question.id }
                 content={ question.content }
                 author={ question.author }
+                isAnswered={ question.isAnswered }
+                isHighlighted={ question.isHighlighted }
               >
                 <button
                   type="button"
-                  onClick={() => handleDeleteQuestion(question.id)}
+                  onClick={() => handleCheckQuestionAnswered(question.id)}
+                >
+                  <img src={ checkImg } alt="Marcar pergunta como respondida" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleHighligthQuestion(question.id)}
+                >
+                  <img src={ answerImg } alt="Dar destaque a pergunta" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuestionIdModalOpen(question.id)}
                 >
                   <img src={ deleteImg } alt="Remover pergunta" />
                 </button>
               </Question>
+
+              <Modal 
+              isOpen={ questionIdModalOpen === question.id }
+              onRequestClose= {() => setQuestionIdModalOpen(undefined)}
+            >
+              <button onClick={() => handleDeleteQuestion(question.id)}>Deletar</button>
+              <button onClick= {() => setQuestionIdModalOpen(undefined)}>Fechar</button>
+            </Modal>
+            </Fragment>
             );
           }) }
         </div>        

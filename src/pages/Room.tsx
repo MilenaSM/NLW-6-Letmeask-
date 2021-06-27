@@ -9,9 +9,11 @@ import { Question } from '../components/Question';
 import { RoomCode } from '../components/RoomCode';
 import { useAuth } from '../hooks/useAuth';
 import { useRoom } from '../hooks/useRoom';
+import { useTheme } from '../hooks/useTheme';
 import { database } from '../services/firebase';
 
 import '../styles/room.scss';
+import '../styles/auth.scss';
 
 type RoomParams = {
   id: string; 
@@ -22,6 +24,7 @@ export function Room() {
   const params = useParams<RoomParams>();
   const [newQuestion, setNewQuestion] = useState('');
   const roomId = params.id;
+  const { theme, toggleTheme } = useTheme();
 
   const { title, questions } = useRoom(roomId);
  
@@ -42,7 +45,7 @@ export function Room() {
         name: user.name,
         avatar: user.avatar,
       },
-      isHighLighted: false,
+      isHighlighted: false,
       isAnswered: false
     };
 
@@ -62,11 +65,17 @@ export function Room() {
   }
 
   return (
-    <div id="page-room">
+    <div id="page-room" className={ theme }>
       <header>
         <div className="content">
-          <img src={ logoImg } alt="Letmeask" />
+          <img src={ logoImg } className="logo" alt="Letmeask" />
           <RoomCode code={ roomId } />
+        </div>
+        <div className="container">
+          <label className="switch">
+            <input onClick={ toggleTheme }type="checkbox" />    
+            <div></div>
+          </label>
         </div>
       </header>
 
@@ -102,6 +111,8 @@ export function Room() {
                 key={ question.id }
                 content={ question.content }
                 author={ question.author }
+                isAnswered={ question.isAnswered }
+                isHighlighted={ question.isHighlighted }
               >
                 <button
                   className={`like-button ${question.likeId ? 'liked' : ''}`}

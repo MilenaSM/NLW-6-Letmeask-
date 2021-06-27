@@ -11,12 +11,14 @@ import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/Button';
 
 import '../styles/auth.scss';
+import { useTheme } from '../hooks/useTheme';
 
 
 export function NewRoom() {
   const { user } = useAuth();
   const history = useHistory();
   const [newRoom, setNewRoom] = useState('');
+  const { theme, toggleTheme } = useTheme();
 
   async function handleCreateRoom(event: FormEvent) {
     event.preventDefault();
@@ -36,15 +38,23 @@ export function NewRoom() {
   }
 
   return (
-    <div id="page-auth"> 
+    <div id="page-auth" className={ theme }> 
+    <div className="container">
+          <label className="switch">
+            <input onClick={ toggleTheme }type="checkbox" />    
+            <div></div>
+          </label>
+        </div>
     <aside>
-      <img src={illustrationImg} alt="Illustração simbolizando perguntas e respostas" />
+      <img src={ illustrationImg } alt="Illustração simbolizando perguntas e respostas" />
       <strong>Crie salas de Q&amp;A ao-vivo</strong>
       <p>Tire as dúvidas de sua audiência em tempo real</p>
     </aside>
     <main>
       <div className="main-content">
-      <img src={logoImg} alt="Letmeask" />
+      <div className="logo-backgrond">
+        <img src={ logoImg }alt="Letmeask" />
+      </div>
       <h2>Criar uma nova sala</h2>
       <form onSubmit={ handleCreateRoom }>
         <input 
